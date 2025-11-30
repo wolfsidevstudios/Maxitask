@@ -3,7 +3,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Category, Task, Note } from "../types";
 
 const parseTaskWithGemini = async (input: string, currentCategory: Category, availableCategories: string[], apiKey?: string): Promise<Partial<Task>> => {
-  const keyToUse = apiKey || process.env.API_KEY;
+  const keyToUse = apiKey;
 
   if (!keyToUse) {
     console.warn("API_KEY is missing, returning mock parsed task.");
@@ -77,7 +77,7 @@ export interface AIResponse {
 }
 
 const processGeneralAIRequest = async (input: string, availableCategories: string[], apiKey?: string): Promise<AIResponse> => {
-  const keyToUse = apiKey || process.env.API_KEY;
+  const keyToUse = apiKey;
 
   if (!keyToUse) {
      // Mock fallback
