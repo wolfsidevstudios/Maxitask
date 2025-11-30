@@ -2,7 +2,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Category, Task, TimelineEvent, VisualTheme, Wallpaper, ThemeConfig, UserProfile, Note, AppMode } from './types';
 import { VISUAL_THEMES, WALLPAPERS, INITIAL_TASKS, INITIAL_CATEGORIES, INITIAL_NOTES } from './constants';
-import { parseTaskWithGemini, processGeneralAIRequest } from './services/geminiService';
 import TaskList from './components/TaskList';
 import Timeline from './components/Timeline';
 import CalendarView from './components/CalendarView';
@@ -11,8 +10,7 @@ import SettingsModal from './components/SettingsModal';
 import Onboarding from './components/Onboarding';
 import NoteGrid from './components/NoteGrid';
 import NoteEditor from './components/NoteEditor';
-import AIView from './components/AIView';
-import { User, Settings, Plus, X, ListTodo, StickyNote, Bot, Calendar as CalendarIcon } from 'lucide-react';
+import { User, Settings, Plus, X, ListTodo, StickyNote, Calendar as CalendarIcon } from 'lucide-react';
 
 // Defaults
 const DEFAULT_THEME = VISUAL_THEMES.find(t => t.id === 'liquid') || VISUAL_THEMES[0];
@@ -36,9 +34,6 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [notes, setNotes] = useState<Note[]>(INITIAL_NOTES);
   const [activeNoteId, setActiveNoteId] = useState<string | undefined>(undefined);
-
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [lastAITranscript, setLastAITranscript] = useState<string | null>(null);
   
   // Custom Category State
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -58,12 +53,6 @@ export default function App() {
       return DEFAULT_WALLPAPER;
   });
 
-  // API Key State
-  const [apiKey, setApiKey] = useState<string>(() => {
-      // Hardcoded for demo
-      return 'AIzaSyCP_WxCzOG5foPnE81G-pZyyAw8LEmkBAk';
-  });
-
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Persist settings
@@ -79,13 +68,6 @@ export default function App() {
     localStorage.setItem('maxitaskUserProfile', JSON.stringify(userProfile));
   }, [userProfile]);
 
-  const handleApiKeyChange = (key: string) => {
-    setApiKey(key);
-    // Note: We are not persisting this override to localStorage to avoid overwriting user prefs permanently in a real app,
-    // but for this demo session it updates the state.
-    localStorage.setItem('maxitask_apiKey', key);
-  };
-
   // Combine VisualTheme and Wallpaper into a ThemeConfig for components
   const themeConfig: ThemeConfig = useMemo(() => ({
     ...currentTheme,
@@ -100,67 +82,16 @@ export default function App() {
     }
   }, [isAddingCategory]);
 
-  // Handle Quick Add Task (Bottom Bar)
+  // Handle Quick Add Task (Bottom Bar) - No AI Parsing
   const handleTaskSubmit = async (input: string) => {
-    setIsProcessing(true);
-    const parsed = await parseTaskWithGemini(input, activeCategory, categories, apiKey);
-    
-    let taskCategory = parsed.category || activeCategory;
-    if (!categories.includes(taskCategory)) {
-        taskCategory = activeCategory;
-    }
-
     const newTask: Task = {
       id: Date.now().toString(),
-      title: parsed.title || input,
-      category: taskCategory,
+      title: input,
+      category: activeCategory,
       completed: false,
-      time: parsed.time,
-      date: parsed.date
     };
 
     setTasks(prev => [newTask, ...prev]);
-    setIsProcessing(false);
-  };
-
-  // Handle Full AI Request (AI Tab)
-  const handleAIRequest = async (input: string) => {
-      setIsProcessing(true);
-      setLastAITranscript(null);
-
-      // Add delay for visual effect of 'thinking'
-      await new Promise(r => setTimeout(r, 800));
-
-      const response = await processGeneralAIRequest(input, categories, apiKey);
-      
-      // Process new Tasks
-      if (response.newTasks && response.newTasks.length > 0) {
-          const createdTasks: Task[] = response.newTasks.map((t, idx) => ({
-              id: (Date.now() + idx).toString(),
-              title: t.title || "New Task",
-              category: (t.category && categories.includes(t.category)) ? t.category : activeCategory,
-              completed: false,
-              time: t.time,
-              date: t.date
-          }));
-          setTasks(prev => [...createdTasks, ...prev]);
-      }
-
-      // Process new Note
-      if (response.newNote) {
-          const newNote: Note = {
-              id: Date.now().toString() + "_note",
-              title: response.newNote.title || "AI Note",
-              content: response.newNote.content || "",
-              category: (response.newNote.category && categories.includes(response.newNote.category)) ? response.newNote.category : activeCategory,
-              lastModified: new Date(),
-              date: response.newNote.date
-          };
-          setNotes(prev => [newNote, ...prev]);
-      }
-
-      setLastAITranscript(response.message);
-      setIsProcessing(false);
   };
 
   const toggleTask = (id: string) => {
@@ -348,25 +279,6 @@ export default function App() {
                     Calendar
                   </div>
                </button>
-
-               {/* AI TAB */}
-               <button 
-                  onClick={() => setAppMode('ai')}
-                  className={`
-                    p-3.5 rounded-[1.5rem] transition-all duration-300 relative group
-                    ${appMode === 'ai' 
-                       ? `${themeConfig.accentColor} ${['liquid', 'ghost'].includes(themeConfig.id) ? 'text-black' : 'text-white'} shadow-[0_0_20px_rgba(0,0,0,0.3)] scale-110` 
-                       : 'bg-transparent text-white/50 hover:text-white hover:bg-white/10'}
-                  `}
-               >
-                  <Bot size={24} strokeWidth={appMode === 'ai' ? 3 : 2} />
-                   <div className={`
-                    absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 rounded-xl text-sm font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none
-                    ${themeConfig.glassColor} ${themeConfig.textColor} border ${themeConfig.borderColor} backdrop-blur-md
-                  `}>
-                    AI Studio
-                  </div>
-               </button>
             </div>
 
             {/* Settings Icon */}
@@ -400,7 +312,6 @@ export default function App() {
                     <button onClick={() => setAppMode('tasks')} className={`p-2 rounded-full ${appMode === 'tasks' ? 'bg-white text-black' : 'text-white/60'}`}><ListTodo size={18}/></button>
                     <button onClick={() => setAppMode('notes')} className={`p-2 rounded-full ${appMode === 'notes' ? 'bg-white text-black' : 'text-white/60'}`}><StickyNote size={18}/></button>
                     <button onClick={() => setAppMode('calendar')} className={`p-2 rounded-full ${appMode === 'calendar' ? 'bg-white text-black' : 'text-white/60'}`}><CalendarIcon size={18}/></button>
-                    <button onClick={() => setAppMode('ai')} className={`p-2 rounded-full ${appMode === 'ai' ? 'bg-white text-black' : 'text-white/60'}`}><Bot size={18}/></button>
                 </div>
                 <button onClick={() => setIsSettingsOpen(true)} className={`p-2 rounded-full border ${themeConfig.glassColor} ${themeConfig.borderColor} text-white`}>
                     <Settings size={20} />
@@ -408,7 +319,7 @@ export default function App() {
             </div>
 
 
-            {/* Categories (Stacked Tabs) - HIDDEN IN AI & CALENDAR MODE */}
+            {/* Categories (Stacked Tabs) - HIDDEN IN CALENDAR MODE */}
             {(appMode === 'tasks' || appMode === 'notes') && (
               <div className="flex items-center mb-8 px-1 md:pt-2 overflow-x-visible relative min-h-[50px]">
                 {categories.map((cat, index) => {
@@ -483,7 +394,7 @@ export default function App() {
                       onUpdateTask={handleTaskUpdate}
                     />
                     <div className="mt-auto pt-6 pb-2">
-                      <InputBar theme={themeConfig} onSubmit={handleTaskSubmit} isProcessing={isProcessing} />
+                      <InputBar theme={themeConfig} onSubmit={handleTaskSubmit} />
                     </div>
                   </div>
                 )}
@@ -501,7 +412,7 @@ export default function App() {
                   </div>
                 )}
 
-                {/* NEW CALENDAR VIEW */}
+                {/* CALENDAR VIEW */}
                 {appMode === 'calendar' && (
                   <div key="calendar-view" className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-6 duration-500">
                       <CalendarView 
@@ -513,23 +424,11 @@ export default function App() {
                       />
                   </div>
                 )}
-
-                {/* NEW AI VIEW */}
-                {appMode === 'ai' && (
-                  <div key="ai-view" className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                     <AIView 
-                        theme={themeConfig} 
-                        onSubmit={handleAIRequest} 
-                        isProcessing={isProcessing}
-                        lastTranscript={lastAITranscript}
-                     />
-                  </div>
-                )}
             </div>
             
           </div>
 
-          {/* RIGHT PANEL: Contextual (Timeline or Notepad) - HIDDEN IN AI & CALENDAR MODE */}
+          {/* RIGHT PANEL: Contextual (Timeline or Notepad) - HIDDEN IN CALENDAR MODE */}
           {(appMode === 'tasks' || appMode === 'notes') && (
             <div className={`
               hidden lg:flex w-[400px] xl:w-[450px] flex-col 
@@ -562,8 +461,6 @@ export default function App() {
         currentWallpaper={currentWallpaper}
         onThemeSelect={setCurrentTheme}
         onWallpaperSelect={setCurrentWallpaper}
-        apiKey={apiKey}
-        onApiKeyChange={handleApiKeyChange}
       />
     </div>
   );

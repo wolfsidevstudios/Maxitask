@@ -65,4 +65,4 @@ export interface UserProfile {
   hasOnboarded: boolean;
 }
 
-export type AppMode = 'tasks' | 'notes' | 'ai' | 'calendar';
+export type AppMode = 'tasks' | 'notes' | 'calendar';

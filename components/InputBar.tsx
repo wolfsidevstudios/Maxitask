@@ -6,10 +6,9 @@ import { ArrowUp, Sparkles, Mic } from 'lucide-react';
 interface InputBarProps {
   theme: ThemeConfig;
   onSubmit: (text: string) => void;
-  isProcessing: boolean;
 }
 
-const InputBar: React.FC<InputBarProps> = ({ theme, onSubmit, isProcessing }) => {
+const InputBar: React.FC<InputBarProps> = ({ theme, onSubmit }) => {
   const [text, setText] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -36,8 +35,7 @@ const InputBar: React.FC<InputBarProps> = ({ theme, onSubmit, isProcessing }) =>
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={isProcessing ? "AI is creating your task..." : "Add a task (e.g., 'Meeting at 2pm')"}
-          disabled={isProcessing}
+          placeholder="Add a task..."
           className={`
             flex-1 bg-transparent border-none outline-none text-base font-medium px-2
             ${theme.textColor}
@@ -60,7 +58,7 @@ const InputBar: React.FC<InputBarProps> = ({ theme, onSubmit, isProcessing }) =>
 
           <button 
             type="submit"
-            disabled={!text || isProcessing}
+            disabled={!text}
             className={`
               p-3 rounded-full transition-all duration-300 flex items-center justify-center
               ${text 
