@@ -2,8 +2,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Category, Task, Note } from "../types";
 
-const parseTaskWithGemini = async (input: string, currentCategory: Category, availableCategories: string[]): Promise<Partial<Task>> => {
-  if (!process.env.API_KEY) {
+const parseTaskWithGemini = async (input: string, currentCategory: Category, availableCategories: string[], apiKey?: string): Promise<Partial<Task>> => {
+  const keyToUse = apiKey || process.env.API_KEY;
+
+  if (!keyToUse) {
     console.warn("API_KEY is missing, returning mock parsed task.");
     return {
       title: input,
@@ -12,7 +14,7 @@ const parseTaskWithGemini = async (input: string, currentCategory: Category, ava
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: keyToUse });
     
     // We want the model to return a JSON object structured like a Task
     // Dynamically include available categories in the prompt and schema
@@ -74,18 +76,20 @@ export interface AIResponse {
   newNote?: Partial<Note>;
 }
 
-const processGeneralAIRequest = async (input: string, availableCategories: string[]): Promise<AIResponse> => {
-  if (!process.env.API_KEY) {
+const processGeneralAIRequest = async (input: string, availableCategories: string[], apiKey?: string): Promise<AIResponse> => {
+  const keyToUse = apiKey || process.env.API_KEY;
+
+  if (!keyToUse) {
      // Mock fallback
      return {
          type: 'chat',
-         message: "I can't connect to my brain right now (Missing API Key), but I would have created that for you!",
+         message: "I can't connect to my brain right now (Missing API Key). Please add your API Key in Settings > Intelligence.",
          newTasks: [],
      };
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: keyToUse });
     const categoriesList = availableCategories.join(", ");
     const today = new Date().toISOString().split('T')[0];
 
@@ -164,7 +168,7 @@ const processGeneralAIRequest = async (input: string, availableCategories: strin
     console.error("Gemini AI error", error);
     return {
         type: 'chat',
-        message: "I encountered an error processing that request. Try again?",
+        message: "I encountered an error processing that request. Please check your API Key in Settings.",
         newTasks: []
     };
   }

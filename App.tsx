@@ -58,6 +58,11 @@ export default function App() {
       return DEFAULT_WALLPAPER;
   });
 
+  // API Key State
+  const [apiKey, setApiKey] = useState<string>(() => {
+      return localStorage.getItem('maxitask_apiKey') || '';
+  });
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Persist settings
@@ -72,6 +77,11 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('maxitaskUserProfile', JSON.stringify(userProfile));
   }, [userProfile]);
+
+  const handleApiKeyChange = (key: string) => {
+    setApiKey(key);
+    localStorage.setItem('maxitask_apiKey', key);
+  };
 
   // Combine VisualTheme and Wallpaper into a ThemeConfig for components
   const themeConfig: ThemeConfig = useMemo(() => ({
@@ -90,7 +100,7 @@ export default function App() {
   // Handle Quick Add Task (Bottom Bar)
   const handleTaskSubmit = async (input: string) => {
     setIsProcessing(true);
-    const parsed = await parseTaskWithGemini(input, activeCategory, categories);
+    const parsed = await parseTaskWithGemini(input, activeCategory, categories, apiKey);
     
     let taskCategory = parsed.category || activeCategory;
     if (!categories.includes(taskCategory)) {
@@ -118,7 +128,7 @@ export default function App() {
       // Add delay for visual effect of 'thinking'
       await new Promise(r => setTimeout(r, 800));
 
-      const response = await processGeneralAIRequest(input, categories);
+      const response = await processGeneralAIRequest(input, categories, apiKey);
       
       // Process new Tasks
       if (response.newTasks && response.newTasks.length > 0) {
@@ -549,6 +559,8 @@ export default function App() {
         currentWallpaper={currentWallpaper}
         onThemeSelect={setCurrentTheme}
         onWallpaperSelect={setCurrentWallpaper}
+        apiKey={apiKey}
+        onApiKeyChange={handleApiKeyChange}
       />
     </div>
   );

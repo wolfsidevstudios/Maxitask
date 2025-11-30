@@ -15,7 +15,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const analytics = getAnalytics(app);
 const googleProvider = new GoogleAuthProvider();
+
+// Analytics can fail in some environments (e.g. ad blockers), so we wrap it
+let analytics;
+try {
+    analytics = getAnalytics(app);
+} catch (e) {
+    console.warn("Firebase Analytics failed to initialize", e);
+}
 
 export { auth, googleProvider, signInWithPopup, firebaseSignOut, analytics };
