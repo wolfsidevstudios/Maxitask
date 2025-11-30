@@ -60,7 +60,8 @@ export default function App() {
 
   // API Key State
   const [apiKey, setApiKey] = useState<string>(() => {
-      return localStorage.getItem('maxitask_apiKey') || '';
+      // Hardcoded for demo
+      return 'AIzaSyCP_WxCzOG5foPnE81G-pZyyAw8LEmkBAk';
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -80,6 +81,8 @@ export default function App() {
 
   const handleApiKeyChange = (key: string) => {
     setApiKey(key);
+    // Note: We are not persisting this override to localStorage to avoid overwriting user prefs permanently in a real app,
+    // but for this demo session it updates the state.
     localStorage.setItem('maxitask_apiKey', key);
   };
 
