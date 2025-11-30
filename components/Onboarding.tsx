@@ -1,8 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, MapPin, User, Sparkles, Check, LogIn, FastForward } from 'lucide-react';
+import { ArrowRight, MapPin, User, Sparkles, Check, FastForward } from 'lucide-react';
 import { VisualTheme, Wallpaper } from '../types';
 import { VISUAL_THEMES, WALLPAPERS } from '../constants';
-import { auth, googleProvider, signInWithPopup } from '../services/firebase';
 
 interface OnboardingProps {
   onComplete: (name: string, location: string, theme: VisualTheme, wallpaper: Wallpaper) => void;
@@ -17,7 +17,6 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   
   // Animation state
   const [isExiting, setIsExiting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleNext = () => {
     if (step === 3) {
@@ -36,25 +35,6 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         // Use defaults
         onComplete(name || 'Guest', location || 'Unknown', selectedTheme, selectedWallpaper);
     }, 800);
-  };
-
-  const handleGoogleLogin = async () => {
-      try {
-          setIsLoading(true);
-          const result = await signInWithPopup(auth, googleProvider);
-          const user = result.user;
-          if (user.displayName) {
-              setName(user.displayName);
-              // Skip name step, go to location
-              setStep(2);
-          } else {
-              setStep(1);
-          }
-      } catch (error) {
-          console.error("Login failed", error);
-      } finally {
-          setIsLoading(false);
-      }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -103,21 +83,6 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 >
                 Get Started
                 <ArrowRight className="inline-block ml-3 group-hover:translate-x-1 transition-transform" size={20} />
-                </button>
-
-                <button 
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-                className="group relative px-8 py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-lg font-bold shadow-xl transition-all hover:bg-white/20 hover:scale-105 min-w-[200px] flex items-center justify-center gap-2"
-                >
-                    {isLoading ? (
-                        <span className="animate-pulse">Connecting...</span>
-                    ) : (
-                        <>
-                            <LogIn size={20} />
-                            <span>Sign In</span>
-                        </>
-                    )}
                 </button>
             </div>
             
