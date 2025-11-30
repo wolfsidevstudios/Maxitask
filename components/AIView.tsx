@@ -198,47 +198,50 @@ const AIView: React.FC<AIViewProps> = ({ theme, onSubmit, isProcessing, lastTran
       {/* ONBOARDING MODAL */}
       {showOnboarding && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all" onClick={() => setShowOnboarding(false)} />
+              {/* Invisible Click Overlay to Close */}
+              <div className="absolute inset-0 z-0" onClick={() => setShowOnboarding(false)} />
               
+              {/* Glossy Modal Content */}
               <div className={`
-                  relative w-full max-w-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-white/10
+                  relative z-10 w-full max-w-2xl 
+                  bg-black/10 backdrop-blur-3xl border border-white/20
                   rounded-[3rem] shadow-2xl p-8 md:p-12 overflow-hidden flex flex-col gap-6 animate-in zoom-in-95 duration-500
               `}>
                   <div className="absolute top-0 right-0 p-8">
-                      <button onClick={() => setShowOnboarding(false)} className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white">
+                      <button onClick={() => setShowOnboarding(false)} className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors">
                           <X size={24} />
                       </button>
                   </div>
 
                   <div className="text-center mb-4">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 mx-auto flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-500/80 to-purple-500/80 mx-auto flex items-center justify-center mb-4 shadow-lg shadow-purple-500/20 backdrop-blur-md">
                           <Sparkles size={32} className="text-white" />
                       </div>
-                      <h2 className="text-3xl font-bold text-white mb-2">Power up your productivity</h2>
-                      <p className="text-white/60 text-lg">Talk naturally. Maxitask handles the rest.</p>
+                      <h2 className="text-3xl font-bold text-white mb-2 text-shadow-sm">Power up your productivity</h2>
+                      <p className="text-white/70 text-lg font-medium">Talk naturally. Maxitask handles the rest.</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                      <div className="p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-sm">
                           <div className="p-2 w-fit rounded-full bg-blue-500/20 text-blue-300 mb-3"><List size={20}/></div>
                           <h3 className="text-white font-bold mb-1">Smart Lists</h3>
-                          <p className="text-sm text-white/50 leading-relaxed">Ask for a "packing list" or "recipe", and I'll create individual tasks for every item.</p>
+                          <p className="text-sm text-white/60 leading-relaxed font-medium">Ask for a "packing list" or "recipe", and I'll create individual tasks.</p>
                       </div>
-                      <div className="p-4 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                      <div className="p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-sm">
                           <div className="p-2 w-fit rounded-full bg-green-500/20 text-green-300 mb-3"><Calendar size={20}/></div>
                           <h3 className="text-white font-bold mb-1">Scheduling</h3>
-                          <p className="text-sm text-white/50 leading-relaxed">Say "remind me tomorrow" or "on Dec 25th" to automatically set dates and times.</p>
+                          <p className="text-sm text-white/60 leading-relaxed font-medium">Say "remind me tomorrow" or "on Dec 25th" to auto-set dates.</p>
                       </div>
-                      <div className="p-4 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                      <div className="p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-sm">
                           <div className="p-2 w-fit rounded-full bg-pink-500/20 text-pink-300 mb-3"><Edit3 size={20}/></div>
                           <h3 className="text-white font-bold mb-1">Drafting</h3>
-                          <p className="text-sm text-white/50 leading-relaxed">Ask me to write emails, summaries, or ideas, and I'll save them as formatted Notes.</p>
+                          <p className="text-sm text-white/60 leading-relaxed font-medium">Ask to write emails or ideas, and I'll save them as Notes.</p>
                       </div>
                   </div>
 
                   <button 
                       onClick={() => setShowOnboarding(false)}
-                      className="mt-4 py-4 rounded-full bg-white text-black font-bold text-lg hover:scale-105 transition-transform shadow-lg"
+                      className="mt-4 py-4 rounded-full bg-white/90 hover:bg-white text-black font-bold text-lg hover:scale-105 transition-all shadow-lg backdrop-blur-sm"
                   >
                       Got it
                   </button>
