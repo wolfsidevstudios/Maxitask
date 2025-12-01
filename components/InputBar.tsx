@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { ThemeConfig } from '../types';
-import { ArrowUp, Sparkles, Mic } from 'lucide-react';
+import { ArrowUp, Plus } from 'lucide-react';
 
 interface InputBarProps {
   theme: ThemeConfig;
@@ -28,7 +27,7 @@ const InputBar: React.FC<InputBarProps> = ({ theme, onSubmit }) => {
           hidden sm:flex items-center justify-center w-10 h-10 rounded-full 
           ${theme.secondaryAccentColor} ${theme.subTextColor}
         `}>
-          <Sparkles size={18} />
+          <Plus size={20} />
         </div>
         
         <input
@@ -45,17 +44,6 @@ const InputBar: React.FC<InputBarProps> = ({ theme, onSubmit }) => {
 
         {/* Action Buttons Group */}
         <div className="flex items-center gap-1">
-          <button 
-            type="button"
-            className={`
-              p-3 rounded-full transition-colors 
-              ${theme.isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}
-              ${theme.subTextColor}
-            `}
-          >
-            <Mic size={20} />
-          </button>
-
           <button 
             type="submit"
             disabled={!text}
